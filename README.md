@@ -7,6 +7,8 @@ This is effective solution for asynchronous image loading with UITableView / UIC
 - Customizes concurrent count with NSURLSessionConfiguration
 - Tasks are appendable or cancellable when needed. Useful to visible UITableViewCells
 
+![](screenshot.png)
+
 # Usage
 
 USGImageCache contains these classes:
