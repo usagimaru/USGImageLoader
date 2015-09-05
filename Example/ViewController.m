@@ -23,14 +23,17 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
 	
 	self.tableView.rowHeight = 90;
 	self.tableView.estimatedRowHeight = 90;
 	self.tableView.separatorInset = UIEdgeInsetsZero;
 	
-	// ImageLoader を用意、デフォルトキャッシュを使用。
-	self.imageLoader = [[USGImageLoader alloc] initWithCache:nil delegate:self];
+	// ImageLoader を用意
+	NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+	config.HTTPMaximumConnectionsPerHost = 6; // Concurrent count
+	self.imageLoader = [[USGImageLoader alloc] initWithCache:nil // Uses default image cache
+											   configuration:config
+													delegate:self];
 	self.imageLoader.cancelsWhenMemoryWarning = YES;
 	
 	// 画像の URL を用意

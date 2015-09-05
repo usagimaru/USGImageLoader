@@ -17,16 +17,24 @@
 @implementation USGImageLoader
 
 - (instancetype)initWithCache:(nullable USGImageCache*)imageCache
+				configuration:(nullable NSURLSessionConfiguration*)configuration
 					 delegate:(id<USGImageLoaderDelegate>)delegate
 {
 	self = [super init];
 	if (self) {
 		_delegate = delegate;
-		_imageDownloadManager = [[USGImageDownloadManager alloc] initWithConfiguration:nil
+		_imageDownloadManager = [[USGImageDownloadManager alloc] initWithConfiguration:configuration
 																	  customImageCache:imageCache
 																			  delegate:self];
 	}
 	return self;
+}
+- (instancetype)initWithCache:(nullable USGImageCache*)imageCache
+					 delegate:(id<USGImageLoaderDelegate>)delegate
+{
+	return [[USGImageLoader alloc] initWithCache:imageCache
+								   configuration:nil
+										delegate:delegate];
 }
 
 - (void)dealloc

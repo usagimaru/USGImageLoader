@@ -22,11 +22,15 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Initialize new ImageLoader instance.
  *
- *  @param imageCache USGImageCache
- *  @param delegate   Delegate
+ *  @param imageCache    USGImageCache
+ *  @param delegate      Delegate
+ *  @param configuration NSURLSessionConfiguration
  *
  *  @return USGImageLoader
  */
+- (instancetype)initWithCache:(nullable USGImageCache*)imageCache
+				configuration:(nullable NSURLSessionConfiguration*)configuration
+					 delegate:(id<USGImageLoaderDelegate>)delegate;
 - (instancetype)initWithCache:(nullable USGImageCache*)imageCache
 					 delegate:(id<USGImageLoaderDelegate>)delegate;
 
@@ -57,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  Notify when finished image loading.
  *
  *  @param imageLoader USGImageLoader
- *  @param image       画像
+ *  @param image       UIImage
  *  @param URL         URL
  *  @param fromCache   Loaded from image cache (BOOL)
  *  @param error       NSError if error existing
