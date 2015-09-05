@@ -77,6 +77,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// すべてのタスクをキャンセル
 - (void)cancellAllTasks;
+/// セッションを無効化
+- (void)invalidateSession;
 
 /// 実行中タスクの NSURL を返す
 - (NSArray*)progressOfURLs;

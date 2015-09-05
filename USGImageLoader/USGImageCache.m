@@ -122,12 +122,16 @@ static NSString *const USGImageCacheDirectoryName = @"USGImageCache";
 		return;
 	}
 	
-	// ファイルキャッシュに保存
-	[self __writeData:data forKey:key];
-	
-	// メモリキャッシュに保存
 	CGFloat scale = [UIScreen mainScreen].scale;
-	[super setObject:[[UIImage alloc] initWithData:data scale:scale] forKey:key];
+	UIImage *image = [[UIImage alloc] initWithData:data scale:scale];
+	
+	if (image) {
+		// ファイルキャッシュに保存
+		[self __writeData:data forKey:key];
+		
+		// メモリキャッシュに保存
+		[super setObject:image forKey:key];
+	}
 }
 - (void)setImageData:(NSData*)data forURL:(NSURL*)URL
 {

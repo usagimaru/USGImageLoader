@@ -11,9 +11,11 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface USGImageDownloadManager () <NSURLSessionDelegate>
 
+@property (nonatomic) NSURLSessionConfiguration *configuration;
 @property (nonatomic) NSURLSession *URLSession;
 @property (nonatomic) NSMapTable *taskTable;
 @property (nonatomic) NSMutableDictionary *imageDataTemps;
+@property (nonatomic) NSOperationQueue *queue;
 
 @end
 
@@ -42,13 +44,20 @@ NS_ASSUME_NONNULL_BEGIN
 			configuration.HTTPMaximumConnectionsPerHost = 6; // 通信の同時接続数（並列化）
 		}
 		
-		NSOperationQueue *queue = [NSOperationQueue currentQueue];
-		self.URLSession = [NSURLSession sessionWithConfiguration:configuration
-														delegate:self
-												   delegateQueue:queue];
+		self.configuration = configuration;
+		self.queue = [NSOperationQueue mainQueue];
+		
+		[self __makeSession];
 	}
 	
 	return self;
+}
+
+- (void)__makeSession
+{
+	self.URLSession = [NSURLSession sessionWithConfiguration:self.configuration
+													delegate:self
+											   delegateQueue:self.queue];
 }
 
 - (void)startDownloadingFromURL:(NSURL*)URL
@@ -130,6 +139,13 @@ NS_ASSUME_NONNULL_BEGIN
 	[self.taskTable removeAllObjects];
 	[self.imageDataTemps removeAllObjects];
 	[[USGNetworkIndicatorManager sharedManager] resetCount:self];
+	[self __makeSession];
+}
+
+- (void)invalidateSession
+{
+	[self.URLSession invalidateAndCancel];
+	[[USGNetworkIndicatorManager sharedManager] resetCount:self];
 }
 
 - (NSArray*)progressOfURLs
@@ -178,6 +194,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
 didCompleteWithError:(NSError *)error
 {
+	__weak __typeof(self) wself = self;
+	
 	NSURL *URL = task.originalRequest.URL;
 	NSString *key = [[URL absoluteString] lowercaseString];
 	[self.taskTable removeObjectForKey:key];
@@ -190,7 +208,9 @@ didCompleteWithError:(NSError *)error
 	// キャンセル
 	else if (error.code == NSURLErrorCancelled) {
 		if ([self.delegate respondsToSelector:@selector(imageDownloadManager:didCancelDownloadImageForURL:)]) {
-			[self.delegate imageDownloadManager:self didCancelDownloadImageForURL:URL];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[wself.delegate imageDownloadManager:wself didCancelDownloadImageForURL:URL];
+			});
 		}
 	}
 	
@@ -200,10 +220,11 @@ didCompleteWithError:(NSError *)error
 	// キャンセルではないタスク終了を通知
 	if (error.code != NSURLErrorCancelled && [self.delegate respondsToSelector:@selector(imageDownloadManager:didFinishDownloadImageForURL:image:error:)]) {
 		UIImage *image = [self.imageCache cachedImageForKey:key];
-		[self.delegate imageDownloadManager:self didFinishDownloadImageForURL:URL image:image error:error];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[wself.delegate imageDownloadManager:wself didFinishDownloadImageForURL:URL image:image error:error];
+		});
 	}
 	
-	__weak __typeof(self) wself = self;
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 		[[USGNetworkIndicatorManager sharedManager] decreaseCount:wself];
 	});

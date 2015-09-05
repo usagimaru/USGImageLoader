@@ -69,6 +69,7 @@
 
 - (IBAction)clearCaches:(id)sender
 {
+	[self.imageLoader cancelAllTasks];
 	[[self.imageLoader imageCache] removeAllObjects];
 	[self.tableView reloadData];
 	[self __loadVisibleImages];
