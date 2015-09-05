@@ -73,8 +73,9 @@ static NSString *const kNetworkIndicatorManagerDefaultCount = @"default";
 	// メインスレッドで処理する
 	__weak __typeof(self) wself = self;
 	dispatch_async(dispatch_get_main_queue(), ^{
+		id key = @([object hash]);
 		
-		NSNumber *countNumber = wself.countTable[object];
+		NSNumber *countNumber = wself.countTable[key];
 		NSInteger count = [countNumber integerValue];
 		
 		count++;
@@ -89,8 +90,8 @@ static NSString *const kNetworkIndicatorManagerDefaultCount = @"default";
 	// メインスレッドで処理する
 	__weak __typeof(self) wself = self;
 	dispatch_async(dispatch_get_main_queue(), ^{
-		
-		NSNumber *countNumber = wself.countTable[object];
+		id key = @([object hash]);
+		NSNumber *countNumber = wself.countTable[key];
 		NSInteger count = [countNumber integerValue];
 		
 		count--;
@@ -98,7 +99,7 @@ static NSString *const kNetworkIndicatorManagerDefaultCount = @"default";
 			count = 0;
 		}
 		
-		wself.countTable[@([object hash])] = @(count);
+		wself.countTable[key] = @(count);
 		
 		[wself __checkCount];
 	});
@@ -108,8 +109,8 @@ static NSString *const kNetworkIndicatorManagerDefaultCount = @"default";
 	// メインスレッドで処理する
 	__weak __typeof(self) wself = self;
 	dispatch_async(dispatch_get_main_queue(), ^{
-		
-		wself.countTable[@([object hash])] = @0;
+		id key = @([object hash]);
+		wself.countTable[key] = @0;
 		
 		[wself __checkCount];
 	});

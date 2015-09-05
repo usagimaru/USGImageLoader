@@ -129,7 +129,6 @@ NS_ASSUME_NONNULL_BEGIN
 	[self.URLSession invalidateAndCancel];
 	[self.taskTable removeAllObjects];
 	[self.imageDataTemps removeAllObjects];
-	[[USGNetworkIndicatorManager sharedManager] resetCount:self];
 }
 
 - (NSArray*)progressOfURLs
@@ -203,10 +202,7 @@ didCompleteWithError:(NSError *)error
 		[self.delegate imageDownloadManager:self didFinishDownloadImageForURL:URL image:image error:error];
 	}
 	
-	__weak __typeof(self) wself = self;
-	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-		[[USGNetworkIndicatorManager sharedManager] decreaseCount:wself];
-	});
+	[[USGNetworkIndicatorManager sharedManager] decreaseCount:self];
 }
 
 
